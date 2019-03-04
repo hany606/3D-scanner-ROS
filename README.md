@@ -10,7 +10,7 @@ Spawn:
 
     roslaunch scanner scanner_control.launch
 
-Rviz:
+Rviz (errors will hide if run scanner_control.launch):
 
     roslaunch scanner scanner_rviz.launch 
 
