@@ -1,0 +1,18 @@
+<launch>
+	<param name="robot_description"
+    		command="$(find xacro)/xacro --inorder '$(find scanner)/urdf/scanner.xacro'" />
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model scanner -param robot_description"/>
+
+	<!-- loads the controllers -->
+	<rosparam file="$(find scanner)/config/scanner_control.yaml" command="load" />
+	<node name="controller_spawner" pkg="controller_manager" type="spawner"
+		ns="/scanner" args="joint_state_controller
+				    joint0_position_controller
+				    joint1_position_controller
+				    joint2_position_controller"/> 
+	
+	<!-- converts joint states to TF transforms -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+	    <remap from="/joint_states" to="/scanner/joint_states" />
+	</node>
+</launch>
