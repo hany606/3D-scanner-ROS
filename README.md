@@ -1,5 +1,12 @@
 # 3D-scanner-ROS
 
+## Dependencies:
+Complete pack of ROS Melodic
+
+```bash
+sudo apt-get install ros-melodic-ros-control ros-melodic-ros-controllers
+```
+
 ## Quick Start
 
 Gazebo:
