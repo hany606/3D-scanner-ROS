@@ -10,26 +10,31 @@ sudo apt-get install ros-melodic-ros-control ros-melodic-ros-controllers
 ## Quick Start
 
 Gazebo:
-
+```bash
     roslaunch gazebo_ros empty_world.launch 
-    
-Spawn:
+```
 
+Spawn:
+```bash
     roslaunch scanner scanner_control.launch
+```
 
 Rviz (errors will hide if run scanner_control.launch):
-
+```bash
     roslaunch scanner scanner_rviz.launch 
+```
 
 Moving script:
-
-    rosrun scanner main.py 1.57 -1.57
-
+```bash 
+    ### Keep signs like here or else picture will be flipped
+    rosrun scanner main.py -1.57 1.57
+```
 
 Example of hand by Moving Joints:
-
+```bash
     rostopic pub /scanner/joint2_position_controller/command std_msgs/Float64 "data: -0.9"
-    
+```
+
 TODO: 
   * Kinect drivers
   * Points cloud to RViz
