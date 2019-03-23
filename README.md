@@ -1,7 +1,7 @@
 # 3D-scanner-ROS
 
 ## Dependencies:
-Complete pack of ROS Melodic
+Complete pack of ROS Melodic and some control staff:
 
 ```bash
 sudo apt-get install ros-melodic-ros-control ros-melodic-ros-controllers
