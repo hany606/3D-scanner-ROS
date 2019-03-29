@@ -33,7 +33,8 @@
 		ns="/scanner" args="joint_state_controller
 				    joint0_position_controller
 				    joint1_position_controller
-				    joint2_position_controller"/> 
+				    joint2_position_controller
+					joint_kinect_position_controller"/> 
 	
 	<!-- converts joint states to TF transforms -->
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">

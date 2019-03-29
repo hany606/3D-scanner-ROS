@@ -13,33 +13,29 @@ increment = math.pi / 360 * 10
 #index of the list indicate the joints number
 joints_positions_settigns=[{'+':'a', '-':'d', 'min':0, 'max':2*math.pi},
                            {'+':'w', '-':'s', 'min':-math.pi/2, 'max':math.pi/2}, 
-                           {'+':'q', '-':'e', 'min':-math.pi/2, 'max':math.pi/2}]
-joints_positions_vars = [0,0,0]     #List of variable to store the positions of the joints
+                           {'+':'q', '-':'e', 'min':-math.pi/2, 'max':math.pi/2},
+                           {'+':'k', '-':'i', 'min':-math.pi/2, 'max':math.pi/2}]
+joints_positions_vars = [0,0,0,0]     #List of variable to store the positions of the joints
 
 def increment_positions(data):
     key = data.data
     print("Recieved key: %s"% key)
     #Choose the needed joint's position to be increased or decreased
-    if(key == joints_positions_settigns[0]['+']):
-        joints_positions_vars[0] += increment
-    elif(key  == joints_positions_settigns[0]['-']):
-        joints_positions_vars[0] -= increment
+    flag = 0
+    for i in range(len(joints_positions_settigns)):
+        if(key == joints_positions_settigns[i]['+']):
+            joints_positions_vars[i] += increment
+            flag = 1
+        elif(key  == joints_positions_settigns[i]['-']):
+            joints_positions_vars[i] -= increment
+            flag = 1
 
-    elif(key == joints_positions_settigns[1]['+']):
-        joints_positions_vars[1] += increment
-    elif(key == joints_positions_settigns[1]['-']):
-        joints_positions_vars[1] -= increment
-    
-    elif(key == joints_positions_settigns[2]['+']):
-        joints_positions_vars[2] += increment
-    elif(key == joints_positions_settigns[2]['-']):
-        joints_positions_vars[2] -= increment
-    
-    else:
+    if(flag == 0):
         print("\n*************\nUnknown Keyboard key\n*************\n")
 
+    
     #Set the boundries
-    for i in range(0,3):
+    for i in range(len(joints_positions_settigns)):
         minn = joints_positions_settigns[i]['min']
         maxx = joints_positions_settigns[i]['max'] 
         if(joints_positions_vars[i] < minn):
@@ -52,7 +48,9 @@ def talker():
     pub_joint0 = rospy.Publisher('/scanner/joint0_position_controller/command', Float64, queue_size=10)
     pub_joint1 = rospy.Publisher('/scanner/joint1_position_controller/command', Float64, queue_size=10)
     pub_joint2 = rospy.Publisher('/scanner/joint2_position_controller/command', Float64, queue_size=10)
-    
+    pub_joint_kinect = rospy.Publisher('/scanner/joint_kinect_position_controller/command', Float64, queue_size=10)
+
+
     #subscriber for the keys
     sub_keys  = rospy.Subscriber('/key_value',String, increment_positions)
 
@@ -68,6 +66,8 @@ def talker():
         pub_joint0.publish(joints_positions_vars[0])
         pub_joint1.publish(joints_positions_vars[1])
         pub_joint2.publish(joints_positions_vars[2])
+        pub_joint_kinect.publish(joints_positions_vars[3])
+        
 
         rate.sleep()
 
