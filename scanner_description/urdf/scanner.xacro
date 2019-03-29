@@ -10,7 +10,8 @@
   <xacro:property name="l1" value="1.55" /> <!-- Link 2 -->
   <xacro:property name="l2" value="1.8" /> <!-- Link 3 -->
 
-  <xacro:property name="h" value="${l0 + l1 + l2 + 2 * axel_offset}" /> <!-- Height of construction -->
+  <!-- Edit the last heigh as the axes is hitting the ground -->
+  <xacro:property name="h" value="${l0 + l1 + l2 + 4 * axel_offset}" /> <!-- (Height of construction -->
 
   <xacro:property name="camera_link" value="0.05" /> <!-- Size of square 'camera' box -->
   <xacro:property name="axel_offset" value="0.05" /> <!-- Space btw top of beam and the each joint -->
@@ -26,8 +27,8 @@
   <joint name="joint0" type="continuous">
     <parent link="world"/>
     <child link="link1"/>
-
-    <origin xyz="0 0 ${h}" rpy="0 ${pi} 0"/>
+    <limit effort="1000.0" lower="0.0" upper="${PI*2}" velocity="0.5"/>
+    <origin xyz="0 0 ${h}" rpy="0 ${PI} 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.7"/>
 
@@ -60,10 +61,10 @@
     </inertial>
   </link>
 
-  <joint name="joint1" type="continuous">
+  <joint name="joint1" type="revolute">
     <parent link="link1"/>
     <child link="link2"/>
-    <limit effort="1000.0" lower="0.0" upper="${pi/2}" velocity="0.5"/>
+    <limit effort="19000.0" lower="${-PI/2}" upper="${PI/2}" velocity="0.5"/>
     <origin xyz="0 ${width} ${l0}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
@@ -96,10 +97,10 @@
     </inertial>
   </link>
 
-  <joint name="joint2" type="continuous">
+  <joint name="joint2" type="revolute">
     <parent link="link2"/>
     <child link="link3"/>
-    <limit effort="1000.0" lower="0" upper="${-pi}" velocity="0.5"/>
+    <limit effort="1000.0" lower="${-PI/2}" upper="${PI/2}" velocity="0.5"/>
     <origin xyz="0 ${width} ${l1}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0.7"/>
@@ -117,7 +118,7 @@
     <visual>
       <origin xyz="0 0 ${l2/2}" rpy="0 0 0"/>
       <geometry>
-	<box size="${width} ${width} ${l2}"/>
+	      <box size="${width} ${width} ${l2}"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -132,12 +133,15 @@
     </inertial>
   </link>
 
-  <joint name="camera_joint" type="fixed">
-    <axis xyz="0 0 0" />
-    <origin xyz="0 0 ${l2 + width}" rpy="${-PI/2} ${-PI/2} ${-PI/2} "/>
+  <joint name="camera_joint" type="revolute">
     <parent link="link3"/>
     <child link="kinect_link"/>
+    <limit effort="1000.0" lower="${-PI/2}" upper="${PI/2}" velocity="0.1"/>
+    <origin xyz="0 0 ${l2 + width}" rpy="${-PI/2} ${-PI/2} ${-PI/2} "/>
+    <axis xyz="0 1 0" />
   </joint>
+
+      
 
   <link name="kinect_link">
     <collision>
@@ -146,19 +150,34 @@
 	     <box size="0.1 0.1 0.1"/>
       </geometry>
     </collision>
-
+    <!-- <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.073000 0.276000 0.072000</size>
+        </box>
+      </geometry>
+    </collision> -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
        <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
+    <!-- <visual name="visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh>
+            <uri>model://kinect/meshes/kinect.dae</uri>
+          </mesh>
+        </geometry>
+    </visual> -->
 
     <inertial>
       <mass value="1e-5" />
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
     </inertial>
+
   </link>
 
 
@@ -205,12 +224,37 @@
     </actuator>
   </transmission>
 
+  <transmission name="tran3">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="camera_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_kinect">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
   <!-- Here we go -->
   <gazebo reference="kinect_link">
-    <sensor type="depth" name="camera1">
+    <!-- <sensor type="depth" name="camera1">
         <always_on>1</always_on>
-        <visualize>true</visualize>             
-        <camera>
+        <visualize>true</visualize>              -->
+    <sensor name="camera" type="depth">
+      <update_rate>20</update_rate>
+      <camera>
+        <horizontal_fov>1.047198</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>3</far>
+        </clip>
+      </camera>
+        <!-- <camera>
             <horizontal_fov>1.047</horizontal_fov>  
             <image>
                 <width>640</width>
@@ -224,30 +268,61 @@
                 <near>0.1</near>
                 <far>100</far>
             </clip>
-        </camera>
-             <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
-             <alwaysOn>true</alwaysOn>
-                <updateRate>1.0</updateRate>
-                <cameraName>camera</cameraName>
-                <frameName>kinect_link</frameName>                   
-            <imageTopicName>rgb/image_raw</imageTopicName>
-            <depthImageTopicName>depth/image_raw</depthImageTopicName>
-            <pointCloudTopicName>depth/points</pointCloudTopicName>
-            <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>              
-            <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>            
-            <pointCloudCutoff>0.4</pointCloudCutoff>                
-                <hackBaseline>0.07</hackBaseline>
-                <distortionK1>0.0</distortionK1>
-                <distortionK2>0.0</distortionK2>
-                <distortionK3>0.0</distortionK3>
-                <distortionT1>0.0</distortionT1>
-                <distortionT2>0.0</distortionT2>
-            <CxPrime>0.0</CxPrime>
-            <Cx>0.0</Cx>
-            <Cy>0.0</Cy>
-            <focalLength>0.0</focalLength>
-            </plugin>
+        </camera> -->
+        <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>1.0</updateRate>
+          <cameraName>camera</cameraName>
+          <frameName>kinect_link</frameName>                   
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>              
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>            
+          <pointCloudCutoff>0.4</pointCloudCutoff>                
+          <hackBaseline>0.07</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+          <CxPrime>0.0</CxPrime>
+          <Cx>0.0</Cx>
+          <Cy>0.0</Cy>
+          <focalLength>0.0</focalLength>
+        </plugin>
     </sensor>
   </gazebo>
+
+  
+<!-- <pose>0 0 0.036 0 0 0</pose>
+    
+      
+        <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.2</baseline>
+          <alwaysOn>true</alwaysOn>
+
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_ir</cameraName>
+          <imageTopicName>/camera/depth/image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/depth/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+          <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
+          <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+          <frameName>camera_link</frameName>
+          <pointCloudCutoff>0.05</pointCloudCutoff>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+      </sensor>
+    </link> -->
   <!-- Here we finish -->
 </robot>

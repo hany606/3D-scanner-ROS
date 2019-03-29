@@ -1,21 +1,74 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64,String
 import math
 import sys
 from threading import Thread
 
-def talker():
-    pub = rospy.Publisher('/scanner/joint0_position_controller/command', Float64, queue_size=10)
+increment = math.pi / 360 * 10
+
+
+#Settings of the keyboard keys for Joints control
+#index of the list indicate the joints number
+joints_positions_settigns=[{'+':'a', '-':'d', 'min':0, 'max':2*math.pi},
+                           {'+':'w', '-':'s', 'min':-math.pi/2, 'max':math.pi/2}, 
+                           {'+':'q', '-':'e', 'min':-math.pi/2, 'max':math.pi/2}]
+joints_positions_vars = [0,0,0]     #List of variable to store the positions of the joints
+
+def increment_positions(data):
+    key = data.data
+    print("Recieved key: %s"% key)
+    #Choose the needed joint's position to be increased or decreased
+    if(key == joints_positions_settigns[0]['+']):
+        joints_positions_vars[0] += increment
+    elif(key  == joints_positions_settigns[0]['-']):
+        joints_positions_vars[0] -= increment
+
+    elif(key == joints_positions_settigns[1]['+']):
+        joints_positions_vars[1] += increment
+    elif(key == joints_positions_settigns[1]['-']):
+        joints_positions_vars[1] -= increment
     
+    elif(key == joints_positions_settigns[2]['+']):
+        joints_positions_vars[2] += increment
+    elif(key == joints_positions_settigns[2]['-']):
+        joints_positions_vars[2] -= increment
+    
+    else:
+        print("\n*************\nUnknown Keyboard key\n*************\n")
+
+    #Set the boundries
+    for i in range(0,3):
+        minn = joints_positions_settigns[i]['min']
+        maxx = joints_positions_settigns[i]['max'] 
+        if(joints_positions_vars[i] < minn):
+            joints_positions_vars[i] = minn
+        if(joints_positions_vars[i] > maxx):
+            joints_positions_vars[i] = maxx%(2*math.pi)
+
+def talker():
+    #publishers for the Joints
+    pub_joint0 = rospy.Publisher('/scanner/joint0_position_controller/command', Float64, queue_size=10)
+    pub_joint1 = rospy.Publisher('/scanner/joint1_position_controller/command', Float64, queue_size=10)
+    pub_joint2 = rospy.Publisher('/scanner/joint2_position_controller/command', Float64, queue_size=10)
+    
+    #subscriber for the keys
+    sub_keys  = rospy.Subscriber('/key_value',String, increment_positions)
+
     rate = rospy.Rate(10) # 10hz
-    position = 0
     while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        position += math.pi / 360 * 10
-        rospy.loginfo(position)
-        pub.publish(position)
+        #The log message to indicate the joints positions
+        log_msg = "j0: %f,\t j1: %f,\t j2: %f\t time:%s" % (joints_positions_vars[0], joints_positions_vars[1],
+                                                            joints_positions_vars[2], rospy.get_time())
+        
+        rospy.loginfo(log_msg)
+        
+        #Pulbish the positions of the joints
+        pub_joint0.publish(joints_positions_vars[0])
+        pub_joint1.publish(joints_positions_vars[1])
+        pub_joint2.publish(joints_positions_vars[2])
+
         rate.sleep()
 
 def init_pos(j1, j2):
