@@ -133,15 +133,14 @@
     </inertial>
   </link>
 
-  <joint name="camera_joint" type="revolute">
+  <joint name="kinect_joint" type="revolute">
     <parent link="link3"/>
     <child link="kinect_link"/>
-    <limit effort="1000.0" lower="${-PI/2}" upper="${PI/2}" velocity="0.1"/>
+    <limit effort="1000.0" lower="${-PI/2}" upper="${PI/2}" velocity="0.5"/>
+    <axis xyz="0 0 1" />
     <origin xyz="0 0 ${l2 + width}" rpy="${-PI/2} ${-PI/2} ${-PI/2} "/>
-    <axis xyz="0 1 0" />
+    <dynamics damping="0.7"/>
   </joint>
-
-      
 
   <link name="kinect_link">
     <collision>
@@ -150,35 +149,25 @@
 	     <box size="0.1 0.1 0.1"/>
       </geometry>
     </collision>
-    <!-- <collision name="collision">
-      <geometry>
-        <box>
-          <size>0.073000 0.276000 0.072000</size>
-        </box>
-      </geometry>
-    </collision> -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
        <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
-    <!-- <visual name="visual">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh>
-            <uri>model://kinect/meshes/kinect.dae</uri>
-          </mesh>
-        </geometry>
-    </visual> -->
-
     <inertial>
-      <mass value="1e-5" />
+      <!-- <mass value="1e-5" /> -->
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-    </inertial>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass * (0.1*0.1 + 0.1*0.1)}" ixy="0.0" ixz="0.0"
+        iyy="${mass * (0.1*0.1 + 0.1*0.1)}" iyz="0.0"
+        izz="${mass * (0.1*0.1 + 0.1*0.1)}"/>
+      </inertial>
 
   </link>
+
+  
 
 
   <!--                GAZEBO RELATED PART                             -->
@@ -226,10 +215,10 @@
 
   <transmission name="tran3">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="camera_joint">
+    <joint name="kinect_joint">
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
-    <actuator name="motor_kinect">
+    <actuator name="motor3">
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
@@ -262,7 +251,6 @@
                 <format>R8G8B8</format>
             </image>
             <depth_camera>
-
             </depth_camera>
             <clip>
                 <near>0.1</near>
@@ -293,7 +281,6 @@
         </plugin>
     </sensor>
   </gazebo>
-
   
 <!-- <pose>0 0 0.036 0 0 0</pose>
     

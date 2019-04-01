@@ -57,8 +57,8 @@ def talker():
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         #The log message to indicate the joints positions
-        log_msg = "j0: %f,\t j1: %f,\t j2: %f\t time:%s" % (joints_positions_vars[0], joints_positions_vars[1],
-                                                            joints_positions_vars[2], rospy.get_time())
+        log_msg = "j0: %f,\t j1: %f,\t j2: %f\t jk: %f\t time:%s" % (joints_positions_vars[0], joints_positions_vars[1],
+                                                            joints_positions_vars[2], joints_positions_vars[3], rospy.get_time())
         
         rospy.loginfo(log_msg)
         
