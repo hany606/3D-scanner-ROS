@@ -30,7 +30,7 @@
 	<!-- loads the controllers -->
 	<rosparam file="$(find scanner)/config/scanner_control.yaml" command="load" />
 	<node name="controller_spawner" pkg="controller_manager" type="spawner"
-		ns="/scanner" args="joint_state_controller"
+		ns="/scanner" args="joint_state_controller joint0_position_controller"
 		/> 
 				    <!-- joint0_position_controller" -->
 
