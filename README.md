@@ -1,13 +1,13 @@
 # 3D-scanner-ROS
 
-## Dependencies:
+### Dependencies:
 Complete pack of ROS Melodic and some control staff:
 
 ```bash
 sudo apt-get install ros-melodic-ros-control ros-melodic-ros-controllers
 ```
 
-## Quick Start
+### Quick Start
 
 Gazebo:
 ```bash
@@ -35,7 +35,28 @@ Example of hand by Moving Joints:
     rostopic pub /scanner/joint2_position_controller/command std_msgs/Float64 "data: -0.9"
 ```
 
-TODO: 
+
+### Fixes
+if after ```catkin_make``` you can't find packages "scanner" and "scanner_pcl" try this:
+```bash
+# First of all
+rospack find scanner
+rospack find scanner_pcl
+
+# If not helped
+catkin_make clean
+catkin_make 
+source devel/setup.bash
+rospack find scanner
+rospack find scanner_pcl
+```
+
+### .pcd visualizer
+```bash
+pcl_viewer -multiview 1 data/60.pcd 
+```
+
+### TODO: 
   * Kinect drivers
   * Points cloud to RViz
   * Add rqt
