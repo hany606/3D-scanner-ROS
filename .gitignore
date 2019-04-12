@@ -1,3 +1,7 @@
 .vscode*
-data/.pcd
-for_photos/*
+scanner_pcl/data/*.pcd
+scanner_pcl/for_photos/*
+
+*.zip
+*.cam
+
