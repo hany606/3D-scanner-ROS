@@ -34,7 +34,7 @@ trans_init = np.asarray(
 base = allPCD[START]
 
 print("########## START Registration ##########")
-for i in range(START+1,100):
+for i in range(START+1,END):
     print("{:d}.pcd: ".format(i))
     source = allPCD[i]
     #Calculate the transformation matrix for the base to be the source
