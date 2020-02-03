@@ -1,6 +1,6 @@
 # 3D-scanner-ROS
 
-Note: My work is mainly in the branch of registration
+Note: My work is mainly in the "dev" and registration branchs.
 
 ## Dependencies:
 Complete pack of ROS Melodic and some control staff:
